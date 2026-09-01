@@ -93,6 +93,15 @@ def init_push_channel_test(common_config: dict):
                 extend_data=extend_data
             )
 
+
+def close_push_channels():
+    """关闭推送通道持有的连接等资源。"""
+    for channel_name, channel in push_channel.push_channel_dict.items():
+        try:
+            channel.close()
+        except Exception as exc:
+            log.warning(f"关闭推送通道【{channel_name}】时出现异常: {exc}")
+
 def init_query_task(query_task_config_list: list):
     global _bilibili_task, _douyu_task, _last_config_mtime
     log.info("初始化查询任务")
@@ -121,12 +130,17 @@ def main():
     common_config = global_config.get_common_config()
     query_task_config_list = global_config.get_query_task_config()
     push_channel_config_list = global_config.get_push_channel_config()
-    # 初始化推送通道
-    init_push_channel(push_channel_config_list)
-    # 初始化推送通道测试
-    init_push_channel_test(common_config)
-    # 初始化查询任务（会进入调度循环）
-    init_query_task(query_task_config_list)
+    try:
+        # 初始化推送通道
+        init_push_channel(push_channel_config_list)
+        # 初始化推送通道测试
+        init_push_channel_test(common_config)
+        # 初始化查询任务（会进入调度循环）
+        init_query_task(query_task_config_list)
+    except KeyboardInterrupt:
+        log.info("收到退出信号，正在关闭推送通道")
+    finally:
+        close_push_channels()
 
 if __name__ == '__main__':
     main()

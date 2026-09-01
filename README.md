@@ -74,6 +74,41 @@ docker run -d -v [配置文件的绝对路径]/config.yml:/mnt/config.yml nfew/a
 | Webhook           | webhook          | ✅(POST) | ⚡️通用的方式，请求格式详见附录                                                                                            |
 | 电子邮件              | email            |    ✅    | 📧通用的方式                                                                                                     |
 
+### NapCatQQ WebSocket 配置
+
+LiveLens 使用 OneBot 11 正向 WebSocket 连接 NapCat，不再通过 HTTP 调用。先在 NapCat
+的网络配置中启用 **WebSocket 服务器**，监听地址建议使用 `127.0.0.1`，端口示例为
+`3001`，并设置访问令牌。消息格式使用 `array`，LiveLens 连接根路径 `/`，以便同时
+接收 API 响应和事件。
+
+```yaml
+push_channel:
+  - name: "napcat_qq"
+    enable: true
+    type: napcat_qq
+    ws_url: "ws://127.0.0.1:3001/"
+    token: "请与 NapCat 的 token 保持一致"
+    # user_id 与 group_id 必须且只能填写一个
+    user_id: ""
+    group_id: "123456789"
+    at_qq: ""
+    connect_timeout: 5
+    response_timeout: 30
+```
+
+- `ws_url` 支持 `ws://` 和 `wss://`；Docker 部署时，`127.0.0.1` 指向容器自身，
+  应改为 NapCat 容器名或宿主机可达地址。
+- Token 通过 `Authorization: Bearer <token>` 发送。鉴权失败不会持续重试；普通网络
+  中断会按退避策略自动重连。
+- 本地图片会由 LiveLens 读取并转换为 `base64://` 后发送，因此图片路径必须对
+  LiveLens 进程可读。HTTP(S) 图片地址会直接交给 NapCat。
+- 修改 WebSocket 地址、Token 或目标账号后需要重启 LiveLens；当前热加载只更新
+  查询任务中的部分字段。
+
+参考：[NapCat 网络配置](https://napneko.github.io/config/basic)、
+[NapCat API](https://napneko.github.io/develop/api)、
+[OneBot 11 WebSocket 通信](https://github.com/botuniverse/onebot-11/blob/master/communication/ws.md)。
+
 ## 本地运行方式
 
 1. （可选，推荐）安装 [uv](https://github.com/astral-sh/uv)

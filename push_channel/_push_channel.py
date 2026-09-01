@@ -17,3 +17,7 @@ class PushChannel(ABC):
         :param extend_data: 扩展数据
         """
         raise NotImplementedError("Subclasses must implement the push method")
+
+    def close(self):
+        """Release resources owned by the channel."""
+        pass

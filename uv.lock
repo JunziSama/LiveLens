@@ -14,6 +14,7 @@ dependencies = [
     { name = "requests-toolbelt" },
     { name = "schedule" },
     { name = "urllib3" },
+    { name = "websockets" },
 ]
 
 [package.metadata]
@@ -25,6 +26,7 @@ requires-dist = [
     { name = "requests-toolbelt", specifier = "==1.0.0" },
     { name = "schedule", specifier = "==1.2.1" },
     { name = "urllib3", specifier = "==1.26.9" },
+    { name = "websockets", specifier = "==14.2" },
 ]
 
 [[package]]
@@ -247,6 +249,12 @@ sdist = { url = "https://pypi.tuna.tsinghua.edu.cn/packages/1b/a5/4eab7485362550
 wheels = [
     { url = "https://pypi.tuna.tsinghua.edu.cn/packages/ec/03/062e6444ce4baf1eac17a6a0ebfe36bb1ad05e1df0e20b110de59c278498/urllib3-1.26.9-py2.py3-none-any.whl", hash = "sha256:44ece4d53fb1706f667c9bd1c648f5469a2ec925fcf3a776667042d645472c14", size = 138990, upload-time = "2022-03-16T13:28:16.026Z" },
 ]
+
+[[package]]
+name = "websockets"
+version = "14.2"
+source = { registry = "https://pypi.tuna.tsinghua.edu.cn/simple" }
+sdist = { url = "https://pypi.tuna.tsinghua.edu.cn/packages/94/54/8359678c726243d19fae38ca14a334e740782336c9f19700858c4eb64a1e/websockets-14.2.tar.gz", hash = "sha256:5059ed9c54945efb321f097084b4c7e52c246f2c869815876a69d1efc4ad6eb5", size = 164394 }
 
 [[package]]
 name = "zipp"

@@ -28,5 +28,7 @@ urllib3==1.26.9
     # via
     #   aio-dynamic-push (pyproject.toml)
     #   requests
+websockets==14.2
+    # via aio-dynamic-push (pyproject.toml)
 zipp==3.21.0
     # via importlib-resources
