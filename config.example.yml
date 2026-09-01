@@ -1,0 +1,222 @@
+common:
+  # ip 代理池
+  proxy_pool:
+    # 是否启用 true/false
+    enable: false
+    # ip池地址，参考 https://github.com/jhao104/proxy_pool
+    proxy_pool_url: ""
+  # 推送通道
+  push_channel:
+    # 是否在项目启动时，给各通道发送一条测试消息 true/false
+    send_test_msg_when_start: false
+
+query_task:
+  # 任务名称，可自定义
+  - name: "bilibili_example"
+    # 是否启用 true/false
+    enable: false
+    # 任务类型，bilibili/weibo/xhs/douyin
+    type: bilibili
+    # 查询间隔，单位秒，不建议设置太频繁
+    intervals_second: 60
+    # 查询开始时间，格式 HH:mm
+    begin_time: "00:00"
+    # 查询结束时间，格式 HH:mm
+    end_time: "23:59"
+    # 推送通道名称，对应 push_channel 中的 name
+    target_push_name_list: []
+    # 是否启用动态检测 true/false
+    enable_dynamic_check: true
+    # 是否启用直播检测 true/false
+    enable_living_check: true
+    # 用户 uid 列表，参考 https://space.bilibili.com/1795147802
+    uid_list: []
+    # 是否跳过提醒"转发"类型的动态 true/false
+    skip_forward: true
+    # 如果请求提示 -352, 可以填入下面两项之一, 建议使用 payload 自动获取buvid3
+    # cookie，可选，配置后可以一定程度防ban，建议用小号的，貌似无痕窗口不登录时拿到的cookie也能用，优先级高于自动获取buvid3
+    cookie: ""
+    # 浏览器指纹，取自于 /x/internal/gaia-gateway/ExClimbWuzhi 接口的body，需要填入的是payload参数的value，用于自动获取并激活buvid3
+    payload: ""
+    # ========== @ 控制字段 ==========
+    at_qq: ""
+    at_qq_dynamic: ""
+    at_qq_live: ""
+    at_qq_live_end: ""
+    # ========== 时长免打扰控制字段（单位：分钟） ==========
+    mute_enable_dynamic: true       # 动态免打扰开关
+    mute_minutes_dynamic: 30        # 动态免打扰时长（分钟）
+    mute_enable_live: true          # 开播免打扰开关
+    mute_minutes_live: 60           # 开播免打扰时长（分钟）
+    mute_enable_live_end: false     # 下播免打扰开关
+    mute_minutes_live_end: 60       # 下播免打扰时长（分钟）
+    # ========== 时间段免打扰（格式：开始时间,结束时间;开始时间,结束时间） ==========
+    # 支持整点（如 0,7）或精确到分钟（如 00:00,07:00），留空表示不启用
+    mute_time_ranges_dynamic: "0,7;"    # 动态免打扰时间段（示例：0,7;12,14）
+    mute_time_ranges_live: "0,7;"       # 开播免打扰时间段（示例：0-7点、12-14点）
+    mute_time_ranges_live_end: ""       # 下播免打扰时间段
+    # =============================================
+
+  - name: "weibo_example"
+    enable: false
+    type: weibo
+    intervals_second: 60
+    begin_time: "00:00"
+    end_time: "23:59"
+    target_push_name_list: []
+    enable_dynamic_check: true
+    uid_list: []
+    cookie: ""
+
+  - name: "xhs_example"
+    enable: false
+    type: xhs
+    intervals_second: 300
+    begin_time: "00:00"
+    end_time: "23:59"
+    target_push_name_list: []
+    enable_dynamic_check: true
+    profile_id_list: []
+    cookie: ""
+
+  - name: "douyin_example"
+    enable: false
+    type: douyin
+    intervals_second: 30
+    begin_time: "00:00"
+    end_time: "23:59"
+    target_push_name_list: []
+    enable_dynamic_check: false
+    signature_server_url: ""
+    username_list: []
+    sec_uid_list: []
+    enable_living_check: true
+    douyin_id_list: []
+
+  - name: "douyu_example"
+    enable: false
+    type: douyu
+    intervals_second: 60
+    begin_time: "00:00"
+    end_time: "23:59"
+    target_push_name_list: []
+    enable_living_check: true
+    room_id_list: []
+    # ========== @ 控制字段（斗鱼） ==========
+    at_qq: ""
+    at_qq_live: ""
+    at_qq_live_end: ""
+    # ========== 时长免打扰控制字段（斗鱼，单位：分钟） ==========
+    mute_enable_live: true          # 开播免打扰开关
+    mute_minutes_live: 60           # 开播免打扰时长（分钟）
+    mute_enable_live_end: false     # 下播免打扰开关
+    mute_minutes_live_end: 60       # 下播免打扰时长（分钟）
+    # ========== 时间段免打扰（斗鱼） ==========
+    mute_time_ranges_live: "0,7;"  # 开播免打扰时间段
+    mute_time_ranges_live_end: ""  # 下播免打扰时间段
+    # =================================================
+
+  - name: "huya_example"
+    enable: false
+    type: huya
+    intervals_second: 300
+    begin_time: "00:00"
+    end_time: "23:59"
+    target_push_name_list: []
+    enable_living_check: true
+    room_id_list: []
+
+push_channel:
+  # 通道名称，唯一，可自定义不要纯数字，对应 query_task 中的 target_push_name_list
+  - name: "server_chan_turbo_example"
+    enable: false
+    type: serverChan_turbo
+    send_key: ""
+
+  - name: "server_chan_3_example"
+    enable: false
+    type: serverChan_3
+    send_key: ""
+    uid: ""
+    tags: ""
+
+  - name: "wecom_apps_example"
+    enable: false
+    type: wecom_apps
+    corp_id: ""
+    agent_id: ""
+    corp_secret: ""
+
+  - name: "wecom_bot_example"
+    enable: false
+    type: wecom_bot
+    key: ""
+
+  - name: "dingtalk_bot_example"
+    enable: false
+    type: dingtalk_bot
+    access_token: ""
+
+  - name: "feishu_apps_example"
+    enable: false
+    type: feishu_apps
+    app_id: ""
+    app_secret: ""
+    receive_id_type: ""
+    receive_id: ""
+
+  - name: "feishu_bot_example"
+    enable: false
+    type: feishu_bot
+    webhook_key: ""
+
+  - name: "telegram_bot_example"
+    enable: false
+    type: telegram_bot
+    api_token: ""
+    chat_id: ""
+
+  - name: "qq_bot_example"
+    enable: false
+    type: qq_bot
+    base_url: ""
+    app_id: ""
+    app_secret: ""
+    push_target_list: []
+
+  - name: "napcat_qq_example"
+    enable: false
+    type: napcat_qq
+    api_url: "http://127.0.0.1:3000"
+    token: ""
+    user_id: ""
+    group_id: ""
+    at_qq: ""
+
+  - name: "bark_example"
+    enable: false
+    type: bark
+    server_url: ""
+    key: ""
+
+  - name: "gotify_example"
+    enable: false
+    type: gotify
+    web_server_url: ""
+
+  - name: "webhook_example"
+    enable: false
+    type: webhook
+    webhook_url: ""
+    request_method: GET
+
+  - name: "email_example"
+    enable: false
+    type: email
+    smtp_host: ""
+    smtp_port: ""
+    smtp_ssl: true
+    smtp_tls: false
+    sender_email: ""
+    sender_password: ""
+    receiver_email: ""
