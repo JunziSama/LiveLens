@@ -5,10 +5,21 @@ common:
     enable: false
     # ip池地址，参考 https://github.com/jhao104/proxy_pool
     proxy_pool_url: ""
-  # 推送通道
-  push_channel:
-    # 是否在项目启动时，给各通道发送一条测试消息 true/false
-    send_test_msg_when_start: false
+  # 启动成功通知；旧版 common.push_channel.send_test_msg_when_start 仍兼容
+  startup_notification:
+    # 是否在项目启动时发送通知 true/false
+    enable: false
+    # 目标推送通道名称；留空表示发送到全部已启用通道
+    target_push_name_list: []
+    title: "【推送组件-启动成功】🎉"
+    content: ""
+    # 支持相对项目目录的本地路径、绝对路径及 http/https/file URL
+    pic_url: "Jun.jpg"
+    jump_url: ""
+    content_before: "[角落里的菌]"
+    content_after: |-
+      哔哩哔哩主页：https://space.bilibili.com/591893685
+      哔哩哔哩直播：http://live.bilibili.com/23075731
 
 query_task:
   # 任务名称，可自定义

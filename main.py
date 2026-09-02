@@ -9,6 +9,7 @@ import push_channel
 import query_task
 from common.config import global_config
 from common.logger import log
+from common.startup_notification import send_startup_notification
 
 # 配置文件路径
 CONFIG_FILE_PATH = Path(__file__).parent / "config.yml"
@@ -67,33 +68,6 @@ def init_push_channel(push_channel_config_list: list):
             log.info(f"初始化推送通道: {config.get('name', '')}，通道类型: {config.get('type', None)}")
             push_channel.push_channel_dict[config.get('name', '')] = push_channel.get_push_channel(config)
 
-def init_push_channel_test(common_config: dict):
-    push_channel_config: dict = common_config.get("push_channel", {})
-    send_test_msg_when_start = push_channel_config.get("send_test_msg_when_start", False)
-    if send_test_msg_when_start:
-        for channel_name, channel in push_channel.push_channel_dict.items():
-            img_path = Path(__file__).parent / "Jun.jpg"
-            local_image_path = f"file:///{img_path.absolute().as_posix()}"
-            title_text = "【推送组件-启动成功】🎉"
-            content_before = "[角落里的菌]"
-            content_after = (
-                "哔哩哔哩主页：https://space.bilibili.com/591893685\n"
-                "哔哩哔哩直播：http://live.bilibili.com/23075731"
-            )
-            extend_data = {
-                'content_before': content_before,
-                'content_after': content_after
-            }
-            log.info(f"推送通道【{channel_name}】发送测试消息")
-            channel.push(
-                title=title_text,
-                content="",
-                pic_url=local_image_path,
-                jump_url=None,
-                extend_data=extend_data
-            )
-
-
 def close_push_channels():
     """关闭推送通道持有的连接等资源。"""
     for channel_name, channel in push_channel.push_channel_dict.items():
@@ -133,8 +107,12 @@ def main():
     try:
         # 初始化推送通道
         init_push_channel(push_channel_config_list)
-        # 初始化推送通道测试
-        init_push_channel_test(common_config)
+        # 推送可配置的启动成功通知
+        send_startup_notification(
+            common_config,
+            push_channel.push_channel_dict,
+            Path(__file__).parent,
+        )
         # 初始化查询任务（会进入调度循环）
         init_query_task(query_task_config_list)
     except KeyboardInterrupt:

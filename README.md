@@ -39,6 +39,9 @@ docker run -d -v [配置文件的绝对路径]/config.yml:/mnt/config.yml nfew/a
 (1)`common`下的参数
 
 - 项目的一些公共参数
+- `startup_notification` 可配置启动成功通知的开关、目标通道、标题、正文、图片和跳转地址。
+- `target_push_name_list` 留空时发送到全部已启用通道；相对图片路径按项目目录解析。
+- 旧版 `common.push_channel.send_test_msg_when_start` 仍可作为兼容开关，新配置存在时优先使用新配置。
 
 (2)`query_task`下的参数
 
