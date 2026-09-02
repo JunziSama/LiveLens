@@ -1,7 +1,7 @@
 import time
 import hashlib
-import requests
 from functools import lru_cache
+from common import util
 from common.logger import log
 
 # WBI 签名密钥映射表（固定）
@@ -25,7 +25,15 @@ def get_wbi_keys() -> tuple:
         "Referer": "https://www.bilibili.com/"
     }
     try:
-        resp = requests.get(url, headers=headers, timeout=10)
+        resp = util.requests_get(
+            url,
+            "获取WBI密钥",
+            headers=headers,
+            retryable=True,
+            timeout=(5, 10),
+        )
+        if resp is None:
+            raise RuntimeError("获取 WBI 密钥失败")
         if resp.status_code != 200:
             log.error(f"获取WBI密钥失败，状态码: {resp.status_code}")
             raise RuntimeError("获取 WBI 密钥失败")

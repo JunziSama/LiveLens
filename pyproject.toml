@@ -3,19 +3,16 @@ name = "aio-dynamic-push"
 version = "0.1.0"
 description = "All-in-one Dynamic Push"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.9,<3.15"
 dependencies = [
     "beautifulsoup4==4.12.3",
     "fake-useragent==1.5.1",
-    "pyyaml==6.0.1",
-    "requests==2.31.0",
+    "pillow==11.3.0",
+    "pyyaml==6.0.3",
+    "qrcode==8.2",
+    "requests==2.32.5",
     "requests-toolbelt==1.0.0",
     "schedule==1.2.1",
-    "urllib3==1.26.9",
+    "urllib3==2.6.3",
     "websockets==14.2",
 ]
-
-[[tool.uv.index]]
-name = "tsinghua"
-url = "https://pypi.tuna.tsinghua.edu.cn/simple"
-default = true

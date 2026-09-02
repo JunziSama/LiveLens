@@ -142,3 +142,4 @@ cython_debug/
 # Local runtime configuration and backups
 /config.yml
 /config.yml.bak
+/qrcode.png

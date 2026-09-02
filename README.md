@@ -139,6 +139,14 @@ push_channel:
    nohup python3 -u main.py >& aio-dynamic-push.log &
    ```
 
+### Windows 云服务器部署
+
+- 支持 CPython 3.9 至 3.14；Windows x64 建议直接使用 64 位官方 Python。
+- 上传项目时不要复制本机的 `.venv`、缓存、日志或 `.git`；直接双击 `Cookie.bat` 即可自动创建环境、检查配置并进入扫码登录。
+- `Cookie.bat --check` 只用于排查部署环境和配置，不是首次运行的必需步骤。
+- Cookie 工具会优先把控制台扩宽后显示二维码；按 `R` 可重新绘制，按 `O` 可手动打开备用图片，程序不会自动弹出图片查看器。
+- Windows 依赖安装只接受预编译 wheel，不需要安装 Visual C++ Build Tools。
+
 ## 开发说明
 
 推荐使用 [uv](https://github.com/astral-sh/uv) 运行

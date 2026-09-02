@@ -1,16 +1,20 @@
 import requests
 
-from common.config import global_config
 from common.logger import log
 
 
 class Proxy(object):
-    current_proxy_ip = None
-
-    _enable = False
-    _proxy_pool_url = None
-
     def __init__(self):
+        self.current_proxy_ip = None
+        self._enable = False
+        self._proxy_pool_url = None
+        self._config_loaded = False
+
+    def _load_config(self):
+        if self._config_loaded:
+            return
+        from common.config import global_config
+
         common_config = global_config.get_common_config()
         proxy_pool = common_config.get("proxy_pool", None)
         if proxy_pool is not None:
@@ -21,6 +25,7 @@ class Proxy(object):
                 log.error("【ip池】未配置ip池地址")
             if self._enable:
                 log.info(f"【ip池】已启用，地址: {self._proxy_pool_url}")
+        self._config_loaded = True
 
     def get_proxy(self, proxy_check_url="https://www.baidu.com", timeout=2, retry_count=10):
         """
@@ -30,6 +35,7 @@ class Proxy(object):
         :param retry_count: 重试次数
         :return: 有效的代理ip
         """
+        self._load_config()
         if not self._enable:
             return None
 

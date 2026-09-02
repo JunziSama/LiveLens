@@ -1,6 +1,4 @@
-import json
 import time
-import random
 import requests  # 添加这一行
 from collections import deque
 
@@ -71,7 +69,14 @@ class QueryBilibili(QueryTask):
                 try:
                     log.info("执行B站预热，访问首页...")
                     warm_headers = self.get_headers(self.uid_list[0] if self.uid_list else '1')
-                    warm_response = util.requests_get('https://www.bilibili.com/', "B站预热", headers=warm_headers, use_proxy=True)
+                    warm_response = util.requests_get(
+                        'https://www.bilibili.com/',
+                        "B站预热",
+                        headers=warm_headers,
+                        use_proxy=True,
+                        session=self._get_session(),
+                        retryable=True,
+                    )
                     if warm_response and warm_response.status_code == 200:
                         log.info("B站预热成功")
                     else:
@@ -98,41 +103,62 @@ class QueryBilibili(QueryTask):
             buvid3 = get_cached_value("buvid3")
         if buvid3 is None:
             buvid3 = self.get_new_buvid3()
-            set_cached_value("buvid3", buvid3)
+            if buvid3:
+                set_cached_value("buvid3", buvid3)
         self.buvid3 = buvid3
 
     def get_new_buvid3(self):
         buvid3 = self.generate_buvid3()
+        if not buvid3:
+            log.error(f"【哔哩哔哩-查询动态状态-{self.name}】未能生成有效 buvid3")
+            return None
+        if not self.payload:
+            log.info(
+                f"【哔哩哔哩-查询动态状态-{self.name}】未配置 payload，"
+                "跳过 buvid3 激活"
+            )
+            return buvid3
+
         url = "https://api.bilibili.com/x/internal/gaia-gateway/ExClimbWuzhi"
         headers = {
             'content-type': 'application/json;charset=UTF-8',
             'cookie': f'buvid3={buvid3};'
         }
-        payload = json.dumps({"payload": self.payload})
-        response = util.requests_post(url, f"哔哩哔哩-查询动态状态-激活buvid3-{self.name}", headers=headers, data=payload, use_proxy=True)
-        if util.check_response_is_ok(response):
-            data = response.json()
+        response = util.requests_post(
+            url,
+            f"哔哩哔哩-查询动态状态-激活buvid3-{self.name}",
+            headers=headers,
+            json={"payload": self.payload},
+            use_proxy=True,
+            session=self._get_session(),
+            retryable=False,
+        )
+        data = self._response_json(response, "激活 buvid3")
+        if data is not None:
             code = data.get("code", -1)
             message = data.get("message", "")
             if code == 0:
                 log.info(f"【哔哩哔哩-查询动态状态-激活buvid3-{self.name}】激活成功")
             else:
                 log.error(f"【哔哩哔哩-查询动态状态-激活buvid3-{self.name}】激活失败, code：{code}, message: {message}")
-        else:
-            log.error(f"【哔哩哔哩-查询动态状态-激活buvid3-{self.name}】激活失败")
         return buvid3
 
     def generate_buvid3(self):
         url = "https://api.bilibili.com/x/frontend/finger/spi"
         headers = {}
-        response = util.requests_get(url, f"哔哩哔哩-查询动态状态-spi-{self.name}", headers=headers, use_proxy=True)
-        if util.check_response_is_ok(response):
-            try:
-                result = json.loads(str(response.content, "utf-8"))
-            except UnicodeDecodeError:
-                log.error(f"【哔哩哔哩-查询动态状态-请求buvid3-{self.name}】解析content出错")
-                return
+        response = util.requests_get(
+            url,
+            f"哔哩哔哩-查询动态状态-spi-{self.name}",
+            headers=headers,
+            use_proxy=True,
+            session=self._get_session(),
+            retryable=True,
+        )
+        result = self._response_json(response, "请求 buvid3")
+        if result is not None:
             data = result.get("data")
+            if not isinstance(data, dict):
+                return None
             buvid3 = data.get("b_3")
             return buvid3
         return None
@@ -177,20 +203,15 @@ class QueryBilibili(QueryTask):
         session = self._get_session()
         # 临时更新 headers 中的 cookie
         session.headers.update({"cookie": headers["cookie"]})
-        try:
-            response = session.get(query_url, timeout=30, proxies=util._get_proxy() if my_proxy.current_proxy_ip else None, verify=False)
-        except Exception as e:
-            log.error(f"请求动态接口异常: {e}")
-            return
-
-        if response.status_code != 200:
-            log.error(f"动态接口返回非200状态码: {response.status_code}, url: {response.url}")
-            return
-
-        try:
-            result = response.json()
-        except Exception as e:
-            log.error(f"解析动态响应JSON失败: {e}")
+        response = util.requests_get(
+            query_url,
+            f"哔哩哔哩-查询动态状态-{self.name}",
+            use_proxy=True,
+            session=session,
+            retryable=True,
+        )
+        result = self._response_json(response, "查询动态状态")
+        if result is None:
             return
 
         if result["code"] != 0:
@@ -325,10 +346,17 @@ class QueryBilibili(QueryTask):
         else:
             headers["cookie"] = "l=v;"
 
-        data = json.dumps({"uids": list(map(int, uid_list))})
-        response = util.requests_post(query_url, "哔哩哔哩-查询直播状态", headers=headers, data=data, use_proxy=True)
-        if util.check_response_is_ok(response):
-            result = json.loads(str(response.content, "utf-8"))
+        response = util.requests_post(
+            query_url,
+            "哔哩哔哩-查询直播状态",
+            headers=headers,
+            json={"uids": list(map(int, uid_list))},
+            use_proxy=True,
+            session=self._get_session(),
+            retryable=True,
+        )
+        result = self._response_json(response, "查询直播状态")
+        if result is not None:
             if result["code"] != 0:
                 log.error(f"【哔哩哔哩-查询直播状态-{self.name}】请求返回数据code错误：{result['code']}")
             else:
@@ -370,6 +398,38 @@ class QueryBilibili(QueryTask):
                             self.push_for_bili_live_end(uname, uid, room_title, avatar_url=avatar_url)
         else:
             log.error(f"【哔哩哔哩-查询直播状态-{self.name}】请求失败")
+
+    def _response_json(self, response, operation):
+        if response is None:
+            return None
+        if response.status_code == 412:
+            log.warning(
+                f"【哔哩哔哩-{operation}-{self.name}】触发 412 风控，"
+                "已跳过本轮请求"
+            )
+            return None
+        if response.status_code != 200:
+            log.error(
+                f"【哔哩哔哩-{operation}-{self.name}】HTTP 状态码: "
+                f"{response.status_code}"
+            )
+            return None
+        content_type = response.headers.get("Content-Type", "").lower()
+        if "json" not in content_type:
+            log.error(
+                f"【哔哩哔哩-{operation}-{self.name}】返回内容不是 JSON: "
+                f"{content_type or '未知类型'}"
+            )
+            return None
+        try:
+            result = response.json()
+        except (requests.exceptions.JSONDecodeError, ValueError) as exc:
+            log.error(f"【哔哩哔哩-{operation}-{self.name}】JSON 解析失败: {exc}")
+            return None
+        if not isinstance(result, dict):
+            log.error(f"【哔哩哔哩-{operation}-{self.name}】JSON 顶层不是对象")
+            return None
+        return result
 
     @staticmethod
     def get_headers(uid):

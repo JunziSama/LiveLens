@@ -1,32 +1,52 @@
 @echo off
+setlocal
 chcp 65001 >nul
 title 更新B站Cookie
+
+set "PROJECT_DIR=%~dp0"
+set "VENV_PYTHON=%PROJECT_DIR%.venv\Scripts\python.exe"
+set "CHECK_ONLY=0"
+if /I "%~1"=="--check" set "CHECK_ONLY=1"
+cd /d "%PROJECT_DIR%"
 
 echo ========================================
 echo     B站 Cookie 自动更新工具
 echo ========================================
 echo.
 
-:: 检查 Python 是否可用
-python --version >nul 2>&1
+call "%PROJECT_DIR%Live.bat" --check
 if errorlevel 1 (
-    echo 错误: 未找到 Python，请确认已安装并添加到 PATH。
-    pause
+    echo [错误] LiveLens 运行环境检查失败，Cookie 工具未启动。
+    if "%CHECK_ONLY%"=="0" pause
     exit /b 1
 )
 
-:: 检查依赖包（可选，静默安装）
-pip show qrcode >nul 2>&1
-if errorlevel 1 (
-    echo 正在安装依赖库 qrcode 和 pillow ...
-    pip install qrcode pillow -i https://pypi.tuna.tsinghua.edu.cn/simple
+if "%CHECK_ONLY%"=="1" (
+    "%VENV_PYTHON%" "%PROJECT_DIR%cookie_updater.py" --check-config
+    if errorlevel 1 (
+        echo [错误] Cookie 工具导入检查失败。
+        exit /b 1
+    )
+    echo [完成] Cookie 获取工具环境验证成功。
+    exit /b 0
 )
 
-:: 运行 cookie_updater.py
-echo 正在启动二维码登录...
-python cookie_updater.py
+echo [启动] 正在打开二维码登录流程...
+"%VENV_PYTHON%" "%PROJECT_DIR%cookie_updater.py"
+set "UPDATER_EXIT_CODE=%ERRORLEVEL%"
 
-:: 运行结束后等待用户按键（防止窗口闪退）
 echo.
+if "%UPDATER_EXIT_CODE%"=="0" (
+    echo [完成] Cookie 获取工具执行成功。
+) else if "%UPDATER_EXIT_CODE%"=="2" (
+    echo [过期] 二维码已过期，请重新运行 Cookie.bat。
+) else if "%UPDATER_EXIT_CODE%"=="3" (
+    echo [超时] 扫码登录超时，请重新运行 Cookie.bat。
+) else if "%UPDATER_EXIT_CODE%"=="130" (
+    echo [取消] 用户取消了 Cookie 获取。
+) else (
+    echo [失败] Cookie 获取工具退出，代码: %UPDATER_EXIT_CODE%
+)
 echo 按任意键退出...
 pause >nul
+exit /b %UPDATER_EXIT_CODE%
